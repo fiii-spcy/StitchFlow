@@ -1,0 +1,6 @@
+{
+  "name": "StitchFlow",
+  "description": "Digitalisasi Pemesanan Konveksi dalam Satu Platform dengan Manajemen Produksi dan Database Terintegrasi Real-time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

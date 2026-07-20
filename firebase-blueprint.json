@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "ConvectionConfig": {
+      "title": "Convection Configuration",
+      "description": "Tenant settings, owner details, and customized IDR pricing tiers for cloth manufacturing",
+      "type": "object",
+      "properties": {
+        "ownerName": { "type": "string", "description": "Full name of the convection business owner" },
+        "convectionName": { "type": "string", "description": "Custom name/branding of the convection house" },
+        "slug": { "type": "string", "description": "Unique URL-friendly tenant identifier used as custom subdomain" },
+        "prices": {
+          "type": "object",
+          "properties": {
+            "tshirt": { "type": "number", "description": "Standard custom base price for standard combed T-shirts in IDR" },
+            "polo": { "type": "number", "description": "Standard custom base price for classic pique Polo Shirts in IDR" },
+            "hoodie": { "type": "number", "description": "Standard custom base price for premium heavyweight Hoodies in IDR" },
+            "workshirt": { "type": "number", "description": "Standard custom base price for tough twill Workshirts in IDR" }
+          }
+        },
+        "createdAt": { "type": "number", "description": "Registration epoch timestamp" }
+      }
+    },
+    "ConvectionOrder": {
+      "title": "Convection Order",
+      "description": "Individually placed convection order categorized by tenant convectionSlug",
+      "type": "object",
+      "properties": {
+        "convectionSlug": { "type": "string", "description": "Tenant slug mapping to the convection owner" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "skuTitle": { "type": "string" },
+        "fabricType": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "complexity": { "type": "string", "enum": ["simple", "standard", "premium"] },
+        "embroideryType": { "type": "string", "enum": ["none", "screenprint", "embroidery_small", "embroidery_large"] },
+        "deadline": { "type": "string" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      }
+    }
+  },
+  "firestore": {
+    "/convections/{convectionId}": {
+      "schema": "ConvectionConfig",
+      "description": "Global convection listings on the SaaS platform"
+    },
+    "/convection_orders/{orderId}": {
+      "schema": "ConvectionOrder",
+      "description": "Orders tracked by individual convection owners"
+    }
+  }
+}
