@@ -98,7 +98,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
         alert(`Selamat! Usaha konveksi Anda telah sukses di-upgrade ke ${planName}. Fitur baru Anda sekarang telah aktif sepenuhnya!`);
       } catch (err) {
         console.error("Upgrade error: ", err);
-        alert("Gagal melakukan upgrade. Silakan hubungi dukungan teknis StitchFlow.");
+        alert("Gagal melakukan upgrade. Silakan hubungi dukungan teknis.");
       }
     }
   };
@@ -230,7 +230,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
     
     switch (status) {
       case 'Design':
-        message = `Halo *${customerName}*,\n\nTerima kasih! Pesanan konveksi Anda *${skuTitle}* (Kuantitas: ${quantity || 50} pcs) saat ini statusnya telah masuk dalam tahapan *ANTRIAN DESAIN* di StitchFlow 🎨.\n\nTim desainer grafis kami sedang merancang layout pola mockup jahit terbaik untuk Anda saksikan. Kami akan mengabari Anda setelah draf siap disetujui!`;
+        message = `Halo *${customerName}*,\n\nTerima kasih! Pesanan konveksi Anda *${skuTitle}* (Kuantitas: ${quantity || 50} pcs) saat ini statusnya telah masuk dalam tahapan *ANTRIAN DESAIN* di ${convectionInfo?.convectionName || "kami"} 🎨.\n\nTim desainer grafis kami sedang merancang layout pola mockup jahit terbaik untuk Anda saksikan. Kami akan mengabari Anda setelah draf siap disetujui!`;
         break;
       case 'Cutting':
         message = `Halo *${customerName}*,\n\nKabar proses dari pabrik! Pesanan *${skuTitle}* Anda saat ini memasuki proses *POTONG BAHAN (CUTTING)* ✂️.\n\nBahan berkualitas tinggi (${fabricType || 'Pilihan'}) sedang dipotong presisi mengikuti ukuran yang Anda tentukan. Kami meminimalkan residu kain demi kecepatan finishing!`;
@@ -242,7 +242,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
         message = `Halo *${customerName}*,\n\nPesanan *${skuTitle}* Anda telah selesai dirangkai! Sekarang giliran tim ahli *QUALITY CONTROL (QC)* melakukan sortir kelayakan jahit 🔍.\n\nKami merapikan sisa benang (trimming) dan meninjau keakuratan ukuran agar dipastikan 100% sempurna sebelum diserahkan ke kurir pengiriman.`;
         break;
       case 'Ready':
-        message = `Halo *${customerName}*,\n\nKabar luar biasa! Pesanan *${skuTitle}* statusnya dinyatakan: *SELESAI & SIAP DIKIRIM* 🎉!\n\nSeluruh barang telah disetrika uap wangi, disortir bersih, dan dipacking eksklusif dalam kardus pengaman. Driver / agen ekspedisi akan menjemput paket Anda sebentar lagi. Terima kasih banyak telah berkolaborasi dengan StitchFlow!`;
+        message = `Halo *${customerName}*,\n\nKabar luar biasa! Pesanan *${skuTitle}* statusnya dinyatakan: *SELESAI & SIAP DIKIRIM* 🎉!\n\nSeluruh barang telah disetrika uap wangi, disortir bersih, dan dipacking eksklusif dalam kardus pengaman. Driver / agen ekspedisi akan menjemput paket Anda sebentar lagi. Terima kasih banyak telah berkolaborasi dengan ${convectionInfo?.convectionName || "kami"}!`;
         break;
     }
 
@@ -381,6 +381,15 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
     setEditingOrder(order);
     setIsFormOpen(true);
   };
+  const brandColorName = convectionInfo?.brandColor || 'indigo';
+  const brandColors: Record<string, { bg: string, textDark: string, logoBg: string }> = {
+    indigo: { bg: '#4f46e5', textDark: '#312e81', logoBg: '#4f46e5' },
+    emerald: { bg: '#059669', textDark: '#064e3b', logoBg: '#059669' },
+    sky: { bg: '#0284c7', textDark: '#0c4a6e', logoBg: '#0284c7' },
+    rose: { bg: '#e11d48', textDark: '#881337', logoBg: '#e11d48' },
+    amber: { bg: '#d97706', textDark: '#78350f', logoBg: '#d97706' },
+  };
+  const tc = brandColors[brandColorName] || brandColors.indigo;
 
   return (
     <div id="stitchflow-dashboard-root" className={`min-h-screen bg-slate-50/50 flex text-slate-800 antialiased font-sans ${darkMode ? 'dark' : ''}`}>
@@ -393,7 +402,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
           <div className="px-6 pb-6 border-b border-slate-800/60 flex flex-col items-start gap-1.5">
             <div className="flex items-center gap-2.5">
               {convectionInfo ? (
-                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-sm text-white border border-indigo-500">
+                <div style={{ backgroundColor: tc.logoBg, borderColor: tc.logoBg }} className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white border">
                   {convectionInfo.convectionName.charAt(0).toUpperCase()}
                 </div>
               ) : (
@@ -403,7 +412,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
                 {convectionInfo ? convectionInfo.convectionName : 'StitchFlow'}
               </span>
             </div>
-            <span className="text-[9px] font-black tracking-widest text-indigo-400 uppercase bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-900/60 mt-1">
+            <span style={{ color: tc.bg, backgroundColor: tc.textDark, borderColor: tc.textDark }} className="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded border mt-1 opacity-80">
               {convectionInfo ? 'MANAJEMEN AKTIF' : 'CONVECTION OS v2.6'}
             </span>
           </div>
@@ -412,11 +421,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
           <nav className="p-4 space-y-1.5 flex-1 mt-4 text-left">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`w-full px-4 py-3 text-xs font-semibold rounded-xl flex items-center gap-3 transition-colors text-left cursor-pointer ${
-                activeTab === 'overview'
-                  ? 'bg-indigo-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:bg-slate-850 hover:text-slate-100'
-              }`}
+              style={activeTab === 'overview' ? { backgroundColor: tc.bg } : {}} className={`w-full px-4 py-3 text-xs font-semibold rounded-xl flex items-center gap-3 transition-colors text-left cursor-pointer ${activeTab === 'overview' ? 'text-white shadow-md font-bold' : 'text-slate-400 hover:bg-slate-850 hover:text-slate-100'}`}
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Pusat Ikhtisar</span>
@@ -527,7 +532,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
               {convectionInfo ? convectionInfo.ownerName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'AD'}
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-100">{convectionInfo ? convectionInfo.ownerName : 'Baim Wong'}</p>
+              <p className="text-xs font-bold text-slate-100">{convectionInfo ? convectionInfo.ownerName : 'Admin'}</p>
               <p className="text-[10px] text-slate-500 font-bold">Owner Konveksi</p>
             </div>
           </div>
@@ -687,7 +692,7 @@ export default function Dashboard({ onExit, convectionSlug }: DashboardProps) {
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="text-base font-black text-slate-900 tracking-tight">Tingkatkan Layanan StitchFlow Anda</h3>
+              <h3 className="text-base font-black text-slate-900 tracking-tight">Tingkatkan Layanan {convectionInfo?.convectionName || "Anda"}</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Pilih paket premium yang paling cocok dengan perkembangan bisnis konveksi Anda saat ini.
               </p>

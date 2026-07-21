@@ -67,6 +67,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
   const [deadlineDate, setDeadlineDate] = useState('');
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // --- Order Tracking State ---
   const [trackingId, setTrackingId] = useState('SF-8422-TX');
@@ -111,6 +112,65 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
       loadConvection();
     }
   }, [convectionSlug]);
+
+  // ── Dynamic Brand Color Theming System ──
+  const brandColorName = convectionData?.brandColor || 'indigo';
+  const brandColors: Record<string, { 
+    bg: string; bgLight: string; bgGradientFrom: string; bgGradientTo: string;
+    border: string; borderLight: string; 
+    text: string; textDark: string; textLight: string;
+    ring: string; hover: string; hoverBg: string;
+    shadow: string; badgeBg: string; badgeText: string; badgeBorder: string;
+    logoBg: string; buttonBg: string; buttonHover: string;
+    footerBadgeBg: string; footerBadgeBorder: string; footerBadgeText: string;
+  }> = {
+    indigo: {
+      bg: '#4f46e5', bgLight: '#eef2ff', bgGradientFrom: '#4f46e5', bgGradientTo: '#0284c7',
+      border: '#4f46e5', borderLight: '#c7d2fe',
+      text: '#4338ca', textDark: '#312e81', textLight: '#818cf8',
+      ring: 'rgba(79,70,229,0.2)', hover: '#4338ca', hoverBg: '#eef2ff',
+      shadow: 'rgba(79,70,229,0.15)', badgeBg: '#eef2ff', badgeText: '#4338ca', badgeBorder: '#c7d2fe',
+      logoBg: '#4f46e5', buttonBg: '#4f46e5', buttonHover: '#4338ca',
+      footerBadgeBg: '#1e1b4b', footerBadgeBorder: 'rgba(79,70,229,0.3)', footerBadgeText: '#818cf8',
+    },
+    emerald: {
+      bg: '#059669', bgLight: '#ecfdf5', bgGradientFrom: '#059669', bgGradientTo: '#0d9488',
+      border: '#059669', borderLight: '#a7f3d0',
+      text: '#047857', textDark: '#064e3b', textLight: '#34d399',
+      ring: 'rgba(5,150,105,0.2)', hover: '#047857', hoverBg: '#ecfdf5',
+      shadow: 'rgba(5,150,105,0.15)', badgeBg: '#ecfdf5', badgeText: '#047857', badgeBorder: '#a7f3d0',
+      logoBg: '#059669', buttonBg: '#059669', buttonHover: '#047857',
+      footerBadgeBg: '#022c22', footerBadgeBorder: 'rgba(5,150,105,0.3)', footerBadgeText: '#34d399',
+    },
+    sky: {
+      bg: '#0284c7', bgLight: '#f0f9ff', bgGradientFrom: '#0284c7', bgGradientTo: '#0ea5e9',
+      border: '#0284c7', borderLight: '#bae6fd',
+      text: '#0369a1', textDark: '#0c4a6e', textLight: '#38bdf8',
+      ring: 'rgba(2,132,199,0.2)', hover: '#0369a1', hoverBg: '#f0f9ff',
+      shadow: 'rgba(2,132,199,0.15)', badgeBg: '#f0f9ff', badgeText: '#0369a1', badgeBorder: '#bae6fd',
+      logoBg: '#0284c7', buttonBg: '#0284c7', buttonHover: '#0369a1',
+      footerBadgeBg: '#082f49', footerBadgeBorder: 'rgba(2,132,199,0.3)', footerBadgeText: '#38bdf8',
+    },
+    rose: {
+      bg: '#e11d48', bgLight: '#fff1f2', bgGradientFrom: '#e11d48', bgGradientTo: '#f43f5e',
+      border: '#e11d48', borderLight: '#fecdd3',
+      text: '#be123c', textDark: '#881337', textLight: '#fb7185',
+      ring: 'rgba(225,29,72,0.2)', hover: '#be123c', hoverBg: '#fff1f2',
+      shadow: 'rgba(225,29,72,0.15)', badgeBg: '#fff1f2', badgeText: '#be123c', badgeBorder: '#fecdd3',
+      logoBg: '#e11d48', buttonBg: '#e11d48', buttonHover: '#be123c',
+      footerBadgeBg: '#4c0519', footerBadgeBorder: 'rgba(225,29,72,0.3)', footerBadgeText: '#fb7185',
+    },
+    amber: {
+      bg: '#d97706', bgLight: '#fffbeb', bgGradientFrom: '#d97706', bgGradientTo: '#f59e0b',
+      border: '#d97706', borderLight: '#fde68a',
+      text: '#b45309', textDark: '#78350f', textLight: '#fbbf24',
+      ring: 'rgba(217,119,6,0.2)', hover: '#b45309', hoverBg: '#fffbeb',
+      shadow: 'rgba(217,119,6,0.15)', badgeBg: '#fffbeb', badgeText: '#b45309', badgeBorder: '#fde68a',
+      logoBg: '#d97706', buttonBg: '#d97706', buttonHover: '#b45309',
+      footerBadgeBg: '#451a03', footerBadgeBorder: 'rgba(217,119,6,0.3)', footerBadgeText: '#fbbf24',
+    },
+  };
+  const tc = brandColors[brandColorName] || brandColors.indigo;
 
   // Load localStorage tracking IDs on load
   useEffect(() => {
@@ -286,8 +346,9 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
         complexity: 'standard' as SewingComplexity,
         embroideryType: finishingStyle === 'embroidery' ? 'embroidery_small' : finishingStyle === 'screen' ? 'screenprint' : 'none' as EmbroideryType,
         deadline: deadlineDate || new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString().split('T')[0],
+        trackingCode: generatedCode,
         status: 'Design', // Starts at Design phase
-        notes: `${clientNotes}. Addons: ${addonNeckLabels ? 'Label Leher' : ''} ${addonEcoPack ? 'Eco Pack' : ''}`,
+        notes: `${clientNotes}. Addons: ${addonNeckLabels ? 'Label Leher' : ''} ${addonEcoPack ? 'Eco Pack' : ''}${uploadedFile ? ' | File Desain: ' + uploadedFile.name : ''}`,
         createdAt: Date.now(),
         updatedAt: Date.now()
       };
@@ -312,6 +373,41 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
     }
   };
 
+  // Helper to find order by doc ID or tracking code
+  const findOrder = async (idOrCode: string) => {
+    const trimmed = idOrCode.trim();
+    if (trimmed.toUpperCase() === 'SF-8422-TX') return demoTrackedOrder;
+
+    // 1. Try matching Firestore Doc ID directly
+    try {
+      const docRef = doc(db, 'convection_orders', trimmed);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+    } catch (err) {
+      // Ignored: Invalid Firestore ID paths can trigger error, fallback to query search
+    }
+
+    // 2. Fallback: Search all orders for trackingCode match
+    try {
+      const ordersRef = collection(db, 'convection_orders');
+      const q = query(ordersRef);
+      const querySnapshot = await getDocs(q);
+      let found: any = null;
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.trackingCode && data.trackingCode.trim().toUpperCase() === trimmed.toUpperCase()) {
+          found = { id: docSnap.id, ...data };
+        }
+      });
+      return found;
+    } catch (err) {
+      console.error('[findOrder] Query error:', err);
+      return null;
+    }
+  };
+
   // Tracking query lookup code
   const handleTrackSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -322,26 +418,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
     setTrackedOrder(null);
 
     try {
-      // If client is searching our simulated code
-      if (trackingId.trim().toUpperCase() === 'SF-8422-TX') {
-         setTrackedOrder(demoTrackedOrder);
-         setIsSearchingTrack(false);
-         return;
-      }
-
-      // Check firebase custom order snaps
-      const ordersRef = collection(db, 'convection_orders');
-      const q = query(ordersRef);
-      const querySnapshot = await getDocs(q);
-      
-      let foundData: any = null;
-      querySnapshot.forEach((docSnap) => {
-        // match on Firestore ID directly
-        if (docSnap.id === trackingId.trim()) {
-          foundData = { id: docSnap.id, ...docSnap.data() };
-        }
-      });
-
+      const foundData = await findOrder(trackingId);
       if (foundData) {
         setTrackedOrder(foundData);
       } else {
@@ -365,21 +442,11 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
     } else {
       // Trigger search programmatically
       setTrackedOrder(null);
-      setTimeout(() => {
-        const dummyEvent = { preventDefault: () => {} } as React.FormEvent;
-        // set dynamic check
-        const runQuery = async () => {
-          try {
-            const docRef = doc(db, 'convection_orders', id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-              setTrackedOrder({ id: docSnap.id, ...docSnap.data() });
-            }
-          } catch(err) {
-            console.error(err);
-          }
-        };
-        runQuery();
+      setTimeout(async () => {
+        const found = await findOrder(id);
+        if (found) {
+          setTrackedOrder(found);
+        }
       }, 50);
     }
     setActiveTab('track');
@@ -426,10 +493,10 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                 <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-black text-white text-sm">
                   {convectionData.convectionName.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-sm font-black text-indigo-950 uppercase tracking-wide">
+                <span style={{ color: tc.textDark }} className="text-sm font-black uppercase tracking-wide">
                   {convectionData.convectionName}
                 </span>
-                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span style={{ color: tc.text, backgroundColor: tc.badgeBg, borderColor: tc.badgeBorder }} className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border">
                   Starter Plan
                 </span>
               </div>
@@ -438,9 +505,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
               <button 
                 onClick={onExit}
                 className="text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
-              >
-                Kembali ke StitchFlow
-              </button>
+              >Kembali ke Beranda</button>
             )}
           </div>
         </header>
@@ -457,7 +522,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                 Online Ordering Page Nonaktif
               </h1>
               <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
-                Layanan pemesanan interaktif, kalkulator harga otomatis, dan pelacakan order mandiri untuk <span className="font-extrabold text-slate-800">{convectionData.convectionName}</span> tidak tersedia karena berada di <span className="font-extrabold text-indigo-650">StitchFlow Starter Plan</span>.
+                Layanan pemesanan interaktif, kalkulator harga otomatis, dan pelacakan order mandiri untuk <span className="font-extrabold text-slate-800">{convectionData.convectionName}</span> tidak tersedia karena berada di <span className="font-extrabold text-indigo-650">Paket Starter</span>.
               </p>
             </div>
 
@@ -522,7 +587,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
 
         {/* Footer */}
         <footer className="py-6 border-t border-slate-100 text-center text-[10px] text-slate-400">
-          Powered by StitchFlow Convection OS. All rights reserved.
+          Powered by {convectionData?.convectionName || "StitchFlow"} OS. All rights reserved.
         </footer>
       </div>
     );
@@ -538,7 +603,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
             <div onClick={() => setActiveTab('home')} className="cursor-pointer">
               {convectionData ? (
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-white text-sm">
+                  <div style={{ backgroundColor: tc.logoBg }} className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-sm">
                     {convectionData.convectionName.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm font-black text-indigo-950 uppercase tracking-wide">
@@ -583,9 +648,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
               <button 
                 onClick={onExit} 
                 className="text-xs h-9 px-4 rounded-xl border border-slate-200 font-semibold hover:bg-slate-50 text-slate-700 transition"
-              >
-                {convectionData ? 'Website Utama StitchFlow' : 'Dashboard Owner'}
-              </button>
+              >{convectionData ? "Kembali ke Beranda" : "Dashboard Owner"}</button>
             )}
             <button 
               onClick={() => { setEstimatorStep(1); setActiveTab('estimator'); }} 
@@ -611,12 +674,12 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                 {/* Left Hero */}
                 <div className="lg:col-span-6 space-y-7 text-left">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold tracking-wider rounded-lg border border-indigo-100">
-                    <ShieldCheck className="w-3.5 h-3.5" /> Professional Grade Manufacturing ({convectionData ? 'Whitelabel Portal Active' : 'StitchFlow Client'})
+                    <ShieldCheck className="w-3.5 h-3.5" /> Professional Grade Manufacturing ({convectionData ? 'Portal Aktif' : 'StitchFlow Client'})
                   </span>
                   
                   <h1 className="text-4xl md:text-5xl lg:text-[46px] font-extrabold text-slate-900 leading-[1.12] tracking-tight">
                     {convectionData ? (
-                      <>Pesan Pakaian Kustom <br /> di <span className="text-indigo-650 bg-gradient-to-r from-indigo-600 to-sky-650 bg-clip-text text-transparent">{convectionData.convectionName}</span></>
+                      <>Pesan Pakaian Kustom <br /> di <span style={{ backgroundImage: `linear-gradient(to right, ${tc.bgGradientFrom}, ${tc.bgGradientTo})`, color: "transparent" }} className="bg-clip-text font-black">{convectionData.convectionName}</span></>
                     ) : (
                       <>Order Custom Apparel <br className="hidden sm:inline" /> with Precision</>
                     )}
@@ -633,7 +696,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                     <button 
                       onClick={() => { setEstimatorStep(1); setActiveTab('estimator'); }}
-                      className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-650/10 transition-all text-center cursor-pointer flex items-center justify-center gap-1.5"
+                      style={{ backgroundColor: tc.buttonBg, boxShadow: `0 10px 15px -3px ${tc.shadow}` }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = tc.buttonHover} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = tc.buttonBg} className="text-white font-bold text-xs py-3.5 px-6 rounded-xl shadow-lg transition-all text-center cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <span>{convectionData ? 'Mulai Estimasi Harga' : 'Start Your Order'}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -684,7 +747,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
             <section className="bg-white border-y border-slate-100 py-16 px-6">
               <div className="max-w-7xl mx-auto">
                 <div className="text-center space-y-3 mb-12">
-                  <h2 className="text-3xl font-bold text-slate-900 tracking-tight">The StitchFlow Process</h2>
+                  <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{convectionData ? `Proses ${convectionData.convectionName}` : "The Process"}</h2>
                   <p className="text-sm text-slate-500">Transparent, efficient manufacturing from day one.</p>
                 </div>
 
@@ -828,7 +891,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
 
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Ready to bring your designs to life?</h2>
                 <p className="text-xs text-slate-400 max-w-lg mx-auto">
-                  Join over 500+ brands that trust StitchFlow for their manufacturing needs. Start your first order estimate in under 5 minutes.
+                  Join over 500+ brands that trust {convectionData?.convectionName || "us"} for their manufacturing needs. Start your first order estimate in under 5 minutes.
                 </p>
                 
                 <div className="pt-2">
@@ -1120,18 +1183,48 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
 
                     {/* Drag and drop mockup block */}
                     <div className="border-2 border-dashed border-slate-200 bg-slate-50/40 rounded-2xl p-7 text-center space-y-3 relative hover:bg-slate-50 transition duration-300 select-none">
-                      <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-650 flex items-center justify-center mx-auto border border-indigo-100">
-                        <Upload className="w-5 h-5 animate-bounce" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <span className="text-xs font-bold text-slate-800 block">Drag & drop berkas gambar logo / mockup disini</span>
-                        <span className="text-[10px] text-slate-400 block">Format PNG, JPG, PDF atau SVG hingga 10MB</span>
-                      </div>
-                      <input 
-                        type="file" 
-                        disabled
-                        className="absolute inset-0 opacity-0 cursor-not-allowed" 
-                      />
+                      {uploadedFile ? (
+                        <div className="space-y-3">
+                          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
+                            <Check className="w-5 h-5 animate-pulse" />
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-xs font-bold text-slate-800 block truncate max-w-[320px] mx-auto">
+                              📄 {uploadedFile.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setUploadedFile(null)}
+                            className="relative z-10 text-[10px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded-lg transition-colors cursor-pointer"
+                          >
+                            Hapus Berkas
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-650 flex items-center justify-center mx-auto border border-indigo-100" style={{ backgroundColor: tc.bgLight, color: tc.text }}>
+                            <Upload className="w-5 h-5 animate-bounce" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-xs font-bold text-slate-800 block">Drag & drop berkas gambar logo / mockup disini</span>
+                            <span className="text-[10px] text-slate-400 block">Format PNG, JPG, PDF atau SVG hingga 10MB</span>
+                          </div>
+                          <input 
+                            type="file" 
+                            accept=".png,.jpg,.jpeg,.pdf,.svg"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setUploadedFile(e.target.files[0]);
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer" 
+                          />
+                        </>
+                      )}
                     </div>
 
                     {/* Fields */}
@@ -1220,7 +1313,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                     <div className="space-y-2.5 max-w-sm mx-auto">
                       <h3 className="text-xl font-bold text-slate-900">Pesanan Kustom Berhasil Dikirim!</h3>
                       <p className="text-xs text-slate-550 leading-relaxed">
-                        Data penawaran Anda telah tersimpan di cloud database StitchFlow. Desainer kami akan menghubungi WhatsApp Anda dalam lusa waktu.
+                        Data penawaran Anda telah tersimpan di database {convectionData?.convectionName || "kami"}. Desainer kami akan menghubungi WhatsApp Anda dalam lusa waktu.
                       </p>
                     </div>
 
@@ -1804,7 +1897,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                   <div className="relative rounded-2xl overflow-hidden aspect-video w-full border border-slate-200">
                     <img 
                       src="https://images.unsplash.com/photo-1528570c34121-6e3e4cb6076c?auto=format&fit=crop&q=80&w=1000" 
-                      alt="StitchFlow Production Line" 
+                      alt={`${convectionData?.convectionName || "Production"} Line`} 
                       className="w-full h-full object-cover rounded-xl"
                       referrerPolicy="no-referrer"
                     />
@@ -1847,7 +1940,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                         <div className="text-[11px] font-bold text-slate-400 w-24 shrink-0">12 Okt, 2026</div>
                         <div className="space-y-1">
                           <p className="text-slate-800 font-bold">Custom order received, contract lock confirmed.</p>
-                          <p className="text-[10px] text-slate-400">Inventory and raw rolls allocated from the central StitchFlow warehouse.</p>
+                          <p className="text-[10px] text-slate-400">Inventory and raw rolls allocated from the gudang pusat {convectionData?.convectionName || "kami"}.</p>
                         </div>
                       </div>
 
@@ -1977,7 +2070,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
               <div className="bg-white border border-slate-100 rounded-2xl p-12 shadow-sm text-center max-w-lg mx-auto space-y-4">
                 <FileText className="w-12 h-12 text-slate-300 mx-auto" />
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-800">Uji Tracking Pesanan StitchFlow</h3>
+                  <h3 className="text-base font-bold text-slate-800">Uji Tracking Pesanan {convectionData?.convectionName || ""}</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Ketik ID pesanan Anda dari database di atas atau gunakan ID demonstrasi <b>SF-8422-TX</b> untuk melacak simulasi alur jahitan konveksi.
                   </p>
@@ -2083,7 +2176,7 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 border-b border-slate-800 pb-12 mb-8">
           
           <div className="md:col-span-4 space-y-4 text-left">
-            <StitchFlowLogo size="sm" variant="light" />
+            {convectionData ? <div className="font-black text-xl tracking-tight text-white">{convectionData.convectionName}</div> : <StitchFlowLogo size="sm" variant="light" />}
             <p className="text-xs text-slate-400 leading-normal max-w-sm">
               Precision apparel manufacturing for the modern brand owner. High-grade stitching lines, premium fabric weights, and fully integrated real-time logistics.
             </p>
@@ -2119,13 +2212,13 @@ export default function CustomerPortal({ onExit, convectionSlug }: CustomerPorta
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-[9px] text-slate-500">© 2026 StitchFlow Manufacturing.</p>
+            <p className="text-[9px] text-slate-500">© {new Date().getFullYear()} {convectionData?.convectionName || "StitchFlow Manufacturing"}.</p>
           </div>
 
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-medium font-mono">
-          <span>STITCHFLOW HUB CLOUD SERVERS CONNECTED</span>
+          <span>{convectionData ? `${convectionData.convectionName.toUpperCase()} PORTAL CONNECTED` : "STITCHFLOW HUB CLOUD SERVERS CONNECTED"}</span>
           <span>PLATFORM PORTAL ACTIVE V1.0-TS</span>
         </div>
       </footer>

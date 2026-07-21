@@ -17,6 +17,7 @@ export interface ConvectionConfig {
     workshirt: number;
   };
   whatsAppPhone?: string;
+  email?: string;
   brandColor?: string; // 'indigo' | 'sky' | 'emerald' | 'rose' | 'amber' etc.
   tagline?: string;
   createdAt: number;
