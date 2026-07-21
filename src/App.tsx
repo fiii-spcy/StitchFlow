@@ -511,12 +511,12 @@ export default function App() {
       const hostname = window.location.hostname;
       let subdomainSlug = null;
       
-      const mainDomains = ['localhost', '127.0.0.1', 'stitchflow.id'];
+      const mainDomains = ['localhost', '127.0.0.1', 'stitchflow.id', 'vercel.app'];
       
       // Deteksi apakah hostname berupa IP Address (misal: 192.168.1.5 atau 10.0.0.2)
       const isIPAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
       
-      const isMainDomain = isIPAddress || mainDomains.some(domain => hostname === domain || hostname.startsWith('www.'));
+      const isMainDomain = isIPAddress || mainDomains.some(domain => hostname === domain || hostname.startsWith('www.') || hostname.endsWith('.' + domain) || hostname === domain);
       
       if (!isMainDomain && hostname.includes('.')) {
         subdomainSlug = hostname.split('.')[0];
