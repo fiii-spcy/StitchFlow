@@ -88,7 +88,7 @@ export default function App() {
     if (wizardStep !== 'success' || !newRegEmail || !newRegSlug) return;
 
     const orderId = midtransOrderId || `SF-${newRegSlug.toUpperCase()}-${Date.now()}`;
-    const amount = selectedPlan === 'starter' ? 299000 : selectedPlan === 'growth' ? 799000 : 1499000;
+    const amount = selectedPlan === 'starter' ? 199000 : selectedPlan === 'growth' ? 399000 : 699000;
     const packageLabel = selectedPlan === 'starter' ? 'Starter' : selectedPlan === 'growth' ? 'Growth' : 'Enterprise';
     const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
     const date = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
